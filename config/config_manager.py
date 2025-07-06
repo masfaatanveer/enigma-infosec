@@ -2,11 +2,11 @@ import json
 
 def save_configuration(rotors, reflector, filename="config/custom_config.json"):
     """
-    Sauvegarde la configuration des rotors et du réflecteur dans un fichier JSON.
+    Save the configuration of the rotors and the reflector into a JSON file.
     
-    :param rotors: Liste d'objets Rotor avec leur câblage et leurs positions de notch.
-    :param reflector: Objet Reflector avec son câblage.
-    :param filename: Nom du fichier dans lequel enregistrer la configuration (par défaut dans config/custom_config.json).
+    :param rotors: List of Rotor objects with their wiring and notch positions.
+    :param reflector: Reflector object with its wiring.
+    :param filename: Name of the file where configuration will be saved (default: config/custom_config.json).
     """
     config = {
         "rotors": [{"wiring": rotor.wiring, "notch": rotor.notch} for rotor in rotors],
@@ -14,16 +14,16 @@ def save_configuration(rotors, reflector, filename="config/custom_config.json"):
     }
     with open(filename, 'w') as file:
         json.dump(config, file, indent=4)
-    print(f"Configuration sauvegardée dans {filename}")
+    print(f"Configuration saved to {filename}")
 
 def load_configuration(filename="config/default_config.json"):
     """
-    Charge la configuration des rotors et du réflecteur depuis un fichier JSON.
+    Load the configuration of rotors and reflector from a JSON file.
     
-    :param filename: Nom du fichier de configuration (par défaut config/default_config.json).
-    :return: Dictionnaire contenant la configuration des rotors et du réflecteur.
+    :param filename: Name of the configuration file (default: config/default_config.json).
+    :return: Dictionary containing the configuration of rotors and reflector.
     """
     with open(filename, 'r') as file:
         config = json.load(file)
-    print(f"Configuration chargée depuis {filename}")
+    print(f"Configuration loaded from {filename}")
     return config

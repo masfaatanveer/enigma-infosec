@@ -15,32 +15,31 @@ class Rotor:
     def rotate(self):
         """
         Rotate the rotor by one position.
-        Returns True if the rotor reaches the notch position.
+        :return: True if the rotor reaches the notch position (to trigger next rotor).
         """
         self.position = (self.position + 1) % 26
         return self.position == self.notch
 
     def encrypt_forward(self, char):
         """
-        Encrypt the character forward through the rotor.
+        Encrypt the character in the forward direction through the rotor.
         :param char: Character to encrypt.
         :return: Encrypted character.
         """
         index = (ord(char) - ord('A') + self.position - self.ring_setting) % 26
         encrypted_char = self.wiring[index]
-        print(f"Encrypting Forward: {char} -> {encrypted_char} (index: {index})")  # Debugging line
-        return encrypted_char  # Returning directly without additional adjustment
+        # print(f"Encrypting Forward: {char} -> {encrypted_char} (index: {index})")  # Optional debug
+        return encrypted_char
 
     def encrypt_backward(self, char):
         """
-        Encrypt the character backward through the rotor.
+        Encrypt the character in the backward direction through the rotor.
         :param char: Character to decrypt.
         :return: Decrypted character.
         """
-        # Find the index of the character in wiring and adjust for ring and position
         index = (self.wiring.index(char) - self.position + self.ring_setting) % 26
-        decrypted_char = chr(index + ord('A'))  # Adjusting the index calculation
-        print(f"Decrypting Backward: {char} -> {decrypted_char} (index: {index})")  # Debugging line
+        decrypted_char = chr(index + ord('A'))
+        # print(f"Decrypting Backward: {char} -> {decrypted_char} (index: {index})")  # Optional debug
         return decrypted_char
 
     def __str__(self):

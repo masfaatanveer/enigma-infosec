@@ -4,22 +4,23 @@ from enigma import MachineEnigma
 from rotor import Rotor
 from reflector import Reflector
 from config.config_manager import save_configuration, load_configuration
+import hashlib
 
-# Charger la configuration pour les options de rotors et réflecteurs
+# Load configuration for rotor and reflector options
 config = load_configuration("config/default_config.json")
 
-def chiffrer_message():
+def process_message():
     key = key_entry.get().upper()
     message = message_entry.get().upper()
     operation = operation_var.get()
 
-    # Obtenir les choix de rotors et de réflecteur de l'utilisateur
+    # Get selected rotors and reflector
     rotor1_choice = rotor1_combo.get()
     rotor2_choice = rotor2_combo.get()
     rotor3_choice = rotor3_combo.get()
     reflector_choice = reflector_combo.get()
 
-    # Initialiser les rotors et le réflecteur selon les choix de l'utilisateur
+    # Initialize rotors and reflector
     rotor1 = Rotor(config['rotors'][rotor1_choice]['wiring'], config['rotors'][rotor1_choice]['notch'])
     rotor2 = Rotor(config['rotors'][rotor2_choice]['wiring'], config['rotors'][rotor2_choice]['notch'])
     rotor3 = Rotor(config['rotors'][rotor3_choice]['wiring'], config['rotors'][rotor3_choice]['notch'])
@@ -30,50 +31,40 @@ def chiffrer_message():
 
     verbose = verbose_var.get() == 1
 
-    if operation == "Chiffrer":
+    if operation == "Encrypt":
         encrypted_message = machine.encrypt(message, verbose=verbose)
-        result_label.config(text=f"Message chiffré : {encrypted_message}")
-    elif operation == "Déchiffrer":
+        result_label.config(text=f"Encrypted Message: {encrypted_message}")
+    elif operation == "Decrypt":
         decrypted_message = machine.decrypt(message, verbose=verbose)
-        result_label.config(text=f"Message déchiffré : {decrypted_message}")
+        result_label.config(text=f"Decrypted Message: {decrypted_message}")
 
-def sauvegarder_configuration():
-    # Obtenir les choix de rotors et de réflecteur
+def save_user_configuration():
     rotor1_choice = rotor1_combo.get()
     rotor2_choice = rotor2_combo.get()
     rotor3_choice = rotor3_combo.get()
     reflector_choice = reflector_combo.get()
 
-    # Initialiser les rotors et le réflecteur selon les choix de l'utilisateur
     rotor1 = Rotor(config['rotors'][rotor1_choice]['wiring'], config['rotors'][rotor1_choice]['notch'])
     rotor2 = Rotor(config['rotors'][rotor2_choice]['wiring'], config['rotors'][rotor2_choice]['notch'])
     rotor3 = Rotor(config['rotors'][rotor3_choice]['wiring'], config['rotors'][rotor3_choice]['notch'])
     reflector = Reflector(config['reflectors'][reflector_choice])
 
-    # Sauvegarder la configuration dans custom_config.json
     save_configuration([rotor1, rotor2, rotor3], reflector, "config/custom_config.json")
-    result_label.config(text="Configuration sauvegardée dans config/custom_config.json")
+    result_label.config(text="Configuration saved to config/custom_config.json")
 
-def traiter_fichier():
-    """
-    Permet de chiffrer ou déchiffrer un fichier texte sélectionné par l'utilisateur.
-    """
-    # Ouvre une boîte de dialogue pour sélectionner le fichier
+def process_file():
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if not file_path:
-        return  # Annule si aucun fichier n'est sélectionné
+        return
 
-    # Récupère la clé et l'opération
     key = key_entry.get().upper()
     operation = operation_var.get()
 
-    # Obtenir les choix de rotors et de réflecteur
     rotor1_choice = rotor1_combo.get()
     rotor2_choice = rotor2_combo.get()
     rotor3_choice = rotor3_combo.get()
     reflector_choice = reflector_combo.get()
 
-    # Initialiser les rotors et le réflecteur
     rotor1 = Rotor(config['rotors'][rotor1_choice]['wiring'], config['rotors'][rotor1_choice]['notch'])
     rotor2 = Rotor(config['rotors'][rotor2_choice]['wiring'], config['rotors'][rotor2_choice]['notch'])
     rotor3 = Rotor(config['rotors'][rotor3_choice]['wiring'], config['rotors'][rotor3_choice]['notch'])
@@ -84,85 +75,93 @@ def traiter_fichier():
 
     verbose = verbose_var.get() == 1
 
-    # Chiffrement/Déchiffrement du fichier
     with open(file_path, 'r') as file:
         text = file.read()
 
-    if operation == "Chiffrer":
+    if operation == "Encrypt":
         processed_text = machine.encrypt(text, verbose=verbose)
         output_filename = f"{file_path}_encrypted.txt"
-    elif operation == "Déchiffrer":
+    elif operation == "Decrypt":
         processed_text = machine.decrypt(text, verbose=verbose)
         output_filename = f"{file_path}_decrypted.txt"
 
-    # Sauvegarde du résultat
     with open(output_filename, 'w') as file:
         file.write(processed_text)
-    
-    result_label.config(text=f"Fichier traité et sauvegardé sous : {output_filename}")
 
-# Interface Tkinter
+    result_label.config(text=f"File processed and saved as: {output_filename}")
+
+def generate_hashes():
+    message = message_entry.get()
+    if not message:
+        result_label.config(text="Enter a message first.")
+        return
+
+    md5_hash = hashlib.md5(message.encode()).hexdigest()
+    sha256_hash = hashlib.sha256(message.encode()).hexdigest()
+
+    result = f"MD5: {md5_hash}\nSHA256: {sha256_hash}"
+    result_label.config(text=result)
+
+# GUI Setup
 window = tk.Tk()
-window.title("Emulateur Enigma")
-window.geometry("600x400")  # Ajuste la taille de la fenêtre
+window.title("Enigma Emulator")
+window.geometry("800x600")
 
-# Utiliser ttk pour les widgets modernes
 style = ttk.Style(window)
 style.theme_use("default")
 
-# Entrée pour la clé
-ttk.Label(window, text="Clé initiale (ex: ABC) :").pack(pady=5)
+# Key input
+ttk.Label(window, text="Initial Key (e.g., ABC):").pack(pady=5)
 key_entry = ttk.Entry(window, width=10)
+key_entry.insert(0, "MAS")
 key_entry.pack(pady=5)
 
-# Entrée pour le message
-ttk.Label(window, text="Message à traiter :").pack(pady=5)
+# Message input
+ttk.Label(window, text="Message to process:").pack(pady=5)
 message_entry = ttk.Entry(window, width=50)
+message_entry.insert(0, "MASFA")
 message_entry.pack(pady=5)
 
-# Menus déroulants pour les rotors et le réflecteur
-ttk.Label(window, text="Sélectionner le Rotor 1 :").pack(pady=5)
+# Rotor selection
+ttk.Label(window, text="Select Rotor 1:").pack(pady=5)
 rotor1_combo = ttk.Combobox(window, values=list(config['rotors'].keys()))
-rotor1_combo.set("I")  # Valeur par défaut
+rotor1_combo.set("I")
 rotor1_combo.pack(pady=5)
 
-ttk.Label(window, text="Sélectionner le Rotor 2 :").pack(pady=5)
+ttk.Label(window, text="Select Rotor 2:").pack(pady=5)
 rotor2_combo = ttk.Combobox(window, values=list(config['rotors'].keys()))
-rotor2_combo.set("II")  # Valeur par défaut
+rotor2_combo.set("II")
 rotor2_combo.pack(pady=5)
 
-ttk.Label(window, text="Sélectionner le Rotor 3 :").pack(pady=5)
+ttk.Label(window, text="Select Rotor 3:").pack(pady=5)
 rotor3_combo = ttk.Combobox(window, values=list(config['rotors'].keys()))
-rotor3_combo.set("III")  # Valeur par défaut
+rotor3_combo.set("III")
 rotor3_combo.pack(pady=5)
 
-ttk.Label(window, text="Sélectionner le Réflecteur :").pack(pady=5)
+ttk.Label(window, text="Select Reflector:").pack(pady=5)
 reflector_combo = ttk.Combobox(window, values=list(config['reflectors'].keys()))
-reflector_combo.set("B")  # Valeur par défaut
+reflector_combo.set("B")
 reflector_combo.pack(pady=5)
 
-# Options de traitement (Chiffrer ou Déchiffrer)
-operation_var = tk.StringVar(value="Chiffrer")
+# Operation selection
+operation_var = tk.StringVar(value="Encrypt")
 operation_frame = ttk.Frame(window)
 operation_frame.pack(pady=10)
-ttk.Radiobutton(operation_frame, text="Chiffrer", variable=operation_var, value="Chiffrer").pack(side=tk.LEFT, padx=10)
-ttk.Radiobutton(operation_frame, text="Déchiffrer", variable=operation_var, value="Déchiffrer").pack(side=tk.LEFT, padx=10)
+ttk.Radiobutton(operation_frame, text="Encrypt", variable=operation_var, value="Encrypt").pack(side=tk.LEFT, padx=10)
+ttk.Radiobutton(operation_frame, text="Decrypt", variable=operation_var, value="Decrypt").pack(side=tk.LEFT, padx=10)
 
-# Option pour activer le mode verbose
+# Verbose mode
 verbose_var = tk.IntVar()
-ttk.Checkbutton(window, text="Activer le mode verbose", variable=verbose_var).pack(pady=5)
+ttk.Checkbutton(window, text="Enable verbose mode", variable=verbose_var).pack(pady=5)
 
-# Bouton pour traiter le message
-ttk.Button(window, text="Traiter", command=chiffrer_message).pack(pady=15)
+# Buttons
+ttk.Button(window, text="Process Message", command=process_message).pack(pady=10)
+ttk.Button(window, text="Save Configuration", command=save_user_configuration).pack(pady=5)
+ttk.Button(window, text="Process File", command=process_file).pack(pady=5)
+ttk.Button(window, text="Generate MD5 + SHA256 Hash", command=generate_hashes).pack(pady=10)
 
-# Bouton pour sauvegarder la configuration
-ttk.Button(window, text="Sauvegarder Configuration", command=sauvegarder_configuration).pack(pady=5)
-
-# Bouton pour traiter un fichier
-ttk.Button(window, text="Traiter un Fichier", command=traiter_fichier).pack(pady=5)
-
-# Label pour afficher le résultat
-result_label = ttk.Label(window, text="Message traité :", font=("Arial", 12))
-result_label.pack(pady=5)
+# Output label
+result_label = ttk.Label(window, text="Result:", font=("Arial", 12))
+result_label.pack(pady=15)
 
 window.mainloop()

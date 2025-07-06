@@ -5,11 +5,12 @@ from config.config_manager import save_configuration, load_configuration
 
 def encrypt_decrypt_file(machine, filename, operation, verbose=False):
     """
-    Chiffre ou déchiffre le contenu d'un fichier texte et sauvegarde le résultat dans un nouveau fichier.
-    :param machine: Instance de la machine Enigma configurée.
-    :param filename: Chemin du fichier à traiter.
-    :param operation: Type d'opération ('C' pour chiffrer, 'D' pour déchiffrer).
-    :param verbose: Si True, affiche chaque étape du chiffrement/déchiffrement.
+    Encrypts or decrypts the contents of a text file and saves the result to a new file.
+    
+    :param machine: Instance of the configured Enigma machine.
+    :param filename: Path to the file to process.
+    :param operation: Type of operation ('C' for encrypt, 'D' for decrypt).
+    :param verbose: If True, displays each encryption/decryption step.
     """
     with open(filename, 'r') as file:
         text = file.read()
@@ -24,67 +25,68 @@ def encrypt_decrypt_file(machine, filename, operation, verbose=False):
     with open(output_filename, 'w') as file:
         file.write(processed_text)
     
-    print(f"Fichier traité et sauvegardé sous : {output_filename}")
+    print(f"File processed and saved as: {output_filename}")
 
 def main():
-    config_choice = input("Voulez-vous charger la configuration par défaut (D) ou une configuration personnalisée (P) ? (D/P) : ").strip().upper()
+    config_choice = input("Load default configuration (D) or custom configuration (P)? (D/P): ").strip().upper()
     if config_choice == "P":
         config = load_configuration("config/custom_config.json")
     else:
         config = load_configuration("config/default_config.json")
 
-    # Initialisation des rotors et du réflecteur
     try:
+        # Initialize rotors and reflector
         rotor1 = Rotor(config['rotors']['I']['wiring'], config['rotors']['I']['notch'])
         rotor2 = Rotor(config['rotors']['II']['wiring'], config['rotors']['II']['notch'])
         rotor3 = Rotor(config['rotors']['III']['wiring'], config['rotors']['III']['notch'])
 
-        # Accessing the reflector properly
+        # Select the reflector
         reflector_key = 'B'  # You can change this to 'C' if needed
-        reflector_wiring = config['reflectors'][reflector_key]  # Access the reflector wiring
+        reflector_wiring = config['reflectors'][reflector_key]
         reflector = Reflector(reflector_wiring)
 
         machine = MachineEnigma([rotor1, rotor2, rotor3], reflector)
 
-        # Demande de la clé de départ
-        key = input("Entrez la clé initiale (ex: ABC) : ").upper()
+        # Ask for initial key
+        key = input("Enter initial key (e.g., ABC): ").upper()
 
-        # Définir la position initiale des rotors
+        # Set rotor starting positions
         machine.set_rotor_positions(key)
 
-        verbose = input("Souhaitez-vous activer le mode verbose ? (O/N) : ").strip().upper() == "O"
+        verbose = input("Enable verbose mode? (Y/N): ").strip().upper() == "Y"
 
-        operation_type = input("Voulez-vous traiter un (M)essage ou un (F)ichier ? (M/F) : ").strip().upper()
+        operation_type = input("Do you want to process a (M)essage or a (F)ile? (M/F): ").strip().upper()
         
         if operation_type == 'M':
-            operation = input("Voulez-vous (C)hiprer, (D)échiffrer ou (S)auvegarder la configuration ? (C/D/S) : ").strip().upper()
-            if operation == 'C':
-                message = input("Entrez le message à chiffrer : ").upper()
+            operation = input("Do you want to (E)ncrypt, (D)ecrypt, or (S)ave the configuration? (E/D/S): ").strip().upper()
+            if operation == 'E':
+                message = input("Enter message to encrypt: ").upper()
                 encrypted_message = machine.encrypt(message, verbose=verbose)
-                print(f"Message chiffré : {encrypted_message}")
+                print(f"Encrypted message: {encrypted_message}")
             elif operation == 'D':
-                message = input("Entrez le message à déchiffrer : ").upper()
+                message = input("Enter message to decrypt: ").upper()
                 decrypted_message = machine.decrypt(message, verbose=verbose)
-                print(f"Message déchiffré : {decrypted_message}")
+                print(f"Decrypted message: {decrypted_message}")
             elif operation == 'S':
                 save_configuration([rotor1, rotor2, rotor3], reflector, "config/custom_config.json")
-                print("Configuration sauvegardée dans config/custom_config.json")
+                print("Configuration saved to config/custom_config.json")
             else:
-                print("Opération non reconnue.")
+                print("Unrecognized operation.")
 
         elif operation_type == 'F':
-            filename = input("Entrez le chemin du fichier texte à traiter : ")
-            operation = input("Voulez-vous (C)hiprer ou (D)échiffrer le fichier ? (C/D) : ").strip().upper()
+            filename = input("Enter path to the text file: ")
+            operation = input("Do you want to (E)ncrypt or (D)ecrypt the file? (E/D): ").strip().upper()
             
-            if operation in ['C', 'D']:
-                encrypt_decrypt_file(machine, filename, operation, verbose=verbose)
+            if operation in ['E', 'D']:
+                op = 'C' if operation == 'E' else 'D'
+                encrypt_decrypt_file(machine, filename, op, verbose=verbose)
             else:
-                print("Opération non reconnue.")
+                print("Unrecognized operation.")
                 
     except KeyError as e:
-        print(f"Erreur de configuration : clé manquante {e}")
+        print(f"Configuration error: missing key {e}")
     except TypeError as e:
-        print(f"Erreur de type : {e}")
+        print(f"Type error: {e}")
 
 if __name__ == "__main__":
     main()

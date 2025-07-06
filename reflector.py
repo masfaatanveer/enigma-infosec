@@ -1,22 +1,22 @@
 class Reflector:
     def __init__(self, wiring):
         """
-        Initialise le réflecteur avec sa configuration de câblage.
-        :param wiring: Chaîne représentant la substitution du réflecteur.
+        Initialize the reflector with its wiring configuration.
+        :param wiring: A string representing the substitution of the reflector.
         """
         self.wiring = wiring
 
     def reflect(self, char):
         """
-        Transforme la lettre en passant par le réflecteur.
-        :param char: Lettre à transformer.
-        :return: Lettre après passage dans le réflecteur.
+        Reflect the character through the reflector.
+        :param char: Character to transform.
+        :return: Reflected character.
         """
         index = ord(char) - ord('A')
         return self.wiring[index]
 
     def __str__(self):
         """
-        Représentation textuelle pour le débogage.
+        String representation for debugging.
         """
         return f"Reflector(wiring: {self.wiring})"

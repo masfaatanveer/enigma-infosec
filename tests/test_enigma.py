@@ -11,8 +11,8 @@ class TestEnigmaMachine(unittest.TestCase):
         reflector = Reflector("YRUHQSLDPXNGOKMIEBFZCWVJAT")
         self.machine = MachineEnigma([rotor1, rotor2, rotor3], reflector)
 
-    def test_chiffrement_dechiffrement(self):
-        # Vérifie que le message d'origine est récupéré après chiffrement et déchiffrement
+    def test_encryption_decryption(self):
+        # Verifies that the original message is retrieved after encryption and decryption
         self.machine.set_rotor_positions("ABC")
         message = "HELLO"
         encrypted = self.machine.encrypt(message)
