@@ -1,0 +1,13 @@
+{
+    "rotors": {
+        "I": {"wiring": "EKMFLGDQVZNTOWYHXUSPAIBRCJ", "notch": 16},
+        "II": {"wiring": "AJDKSIRUXBLHWTMCQGZNPYFVOE", "notch": 4},
+        "III": {"wiring": "BDFHJLCPRTXVZNYEIWGAKMUSQO", "notch": 21},
+        "IV": {"wiring": "ESOVPZJAYQUIRHXLNFTGKDCMWB", "notch": 9},
+        "V": {"wiring": "VZBRGITYUPSDNHLXAWMJQOFECK", "notch": 25}
+    },
+    "reflectors": {
+        "B": "YRUHQSLDPXNGOKMIEBFZCWVJAT",
+        "C": "FVPJIAOYEDRZXWGCTKUQSBNMHL"
+    }
+}
